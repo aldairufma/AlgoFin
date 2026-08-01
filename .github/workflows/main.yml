@@ -1,0 +1,38 @@
+name: Compilar APK Kivy
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: 1. Puxar os arquivos do projeto
+        uses: actions/checkout@v4
+
+      - name: 2. Configurar o Python 3.11 Estável
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 3. Instalar bibliotecas de sistema e Java
+        run: |
+          sudo apt update
+          sudo apt-get install -y build-essential git python3-dev zip unzip openjdk-17-jdk autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
+
+      - name: 4. Instalar Buildozer e Cython Correto
+        run: |
+          pip install "Cython<3.0" buildozer virtualenv
+
+      - name: 5. Iniciar a Fábrica (Compilação)
+        run: |
+          yes | buildozer -v android debug
+
+      - name: 6. Disponibilizar o APK para Download
+        uses: actions/upload-artifact@v4
+        with:
+          name: AlgoFin-APK
+          path: bin/*.apk
